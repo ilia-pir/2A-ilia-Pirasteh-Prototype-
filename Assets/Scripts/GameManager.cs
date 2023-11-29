@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using FMOD.Studio;
+using FMODUnity;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,8 +16,9 @@ using Debug = UnityEngine.Debug;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
-    [SerializeField] private PlayerInput _playerInput; 
-
+    [SerializeField] private PlayerInput _playerInput;
+    [SerializeField] private EventReference _musicEventReference;
+    private EventInstance _musicEventInstance;
     [Header("interaction")]
     [SerializeField] private GameObject _interactUI;
     [Header("dialogue")]
@@ -43,6 +46,10 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         ShowInteractUI(false);
+
+        _musicEventInstance = RuntimeManager.CreateInstance(_musicEventReference);
+        _musicEventInstance.start();
+        _musicEventInstance.setParameterByName("MusicStage", value: 2);
     }
 
     public void ShowInteractUI(bool show)
@@ -52,6 +59,7 @@ public class GameManager : MonoBehaviour
 
     public void ShowDialogue(Dialogue dialogue)
     {
+        _musicEventInstance.setParameterByName("MusicStage", value: 1);
         inDialogue = true;
         _currentDialogue = dialogue;
         _currentLineIndex = 0;
@@ -64,6 +72,7 @@ public class GameManager : MonoBehaviour
         ShowCurrentLine();
         Cursor.lockState = CursorLockMode.Confined;
         _dialogueAnimation.Play("DialogueShow");
+       
     }
 
     public void HideDialogue()
@@ -73,6 +82,7 @@ public class GameManager : MonoBehaviour
         inDialogue = false;
         _currentDialogue.onEnd.Invoke();
         _playerInput.SwitchCurrentActionMap("Player");
+        _musicEventInstance.setParameterByName("MusicStage", value: 2);
     }
 
     private void ShowCurrentLine()
