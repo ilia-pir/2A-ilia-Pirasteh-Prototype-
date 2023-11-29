@@ -5,6 +5,10 @@ using System.Diagnostics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
+using UnityEngine.UI;
+using Button = UnityEngine.UI.Button;
+using Cursor = UnityEngine.Cursor;
 using Debug = UnityEngine.Debug;
 
 public class GameManager : MonoBehaviour
@@ -19,6 +23,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Animator _dialogueAnimation;
     [SerializeField] private TextMeshProUGUI _speakertext;
     [SerializeField] private TextMeshProUGUI _dialoguetext;
+    [SerializeField] private Button _continueButton;
     [SerializeField] private GameObject _buttonPrefab;
     [SerializeField] private GameObject _buttonGroup;
     public bool inDialogue = false;
@@ -88,9 +93,26 @@ public class GameManager : MonoBehaviour
         _dialoguetext.SetText(dialogueline.text);
             dialogueline.lineevent.Invoke();
         
-        
+           StartCoroutine(FocusButton(dialogueline));
     }
-
+    IEnumerator FocusButton(Dialogueline dialogueLine)
+    {
+        yield return new WaitForEndOfFrame();
+        if (dialogueLine.buttons.Count > 0)
+        {
+            GameObject firstButton = _buttonGroup.transform.GetChild(0).gameObject;
+            firstButton.GetComponent<Button>().Select();
+            
+            _continueButton.gameObject.SetActive(false);
+        }
+        else
+        {
+            _continueButton.gameObject.SetActive(true);
+            _continueButton.Select();
+        }
+    }
+   
+    
     public void Nextline()
     {
         if (!inDialogue) {return;}
@@ -134,6 +156,7 @@ public class GameManager : MonoBehaviour
         SetQuestTitle("");
         SetQuestText("");
     }
+    
 }
     
     
